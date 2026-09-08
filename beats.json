@@ -1,0 +1,16 @@
+{
+  "title": "The ₹10 Chai That Costs ₹14",
+  "style": "xiaohei_conversation",
+  "size": { "w": 704, "h": 1280, "fps": 30 },
+  "source": "CPI 4.45% July 2026 (Trading Economics); food 5.52% (MoSPI); RBI below-target 16 months; USD/INR 94.82, Nifty 24774→23653 (yfinance 2026-09-08). Chai math: 10×1.0552^6=13.82≈₹14.",
+  "beats": [
+    { "id": 1, "scene": "tea_stall",  "speaker": "RAVI",   "vo": "Ten rupees. That's what my chai cost in twenty twenty. Look at it now." },
+    { "id": 2, "scene": "tea_stall",  "speaker": "VIKRAM", "vo": "That's inflation, Ravi. Prices didn't just rise. Your rupee got weaker." },
+    { "id": 3, "scene": "city_park",  "speaker": "VIKRAM", "vo": "Official inflation, four point four five percent. Food? Even more. Five point five." },
+    { "id": 4, "scene": "city_park",  "speaker": "VIKRAM", "vo": "Rule of seventy two. Seventy two divided by four point four five. Prices double in about sixteen years." },
+    { "id": 5, "scene": "home_desk",  "speaker": "RAVI",   "vo": "Wait. My savings account pays three percent. That's less than inflation?!" },
+    { "id": 6, "scene": "trading_floor", "speaker": "VIKRAM", "vo": "That's why we invest. The Nifty wobbles. Down four and a half from its high. But over years, equity outruns inflation." },
+    { "id": 7, "scene": "evening_road", "speaker": "RAVI",   "vo": "So money just sitting in the bank is slowly... melting." },
+    { "id": 8, "scene": "evening_road", "speaker": "VIKRAM", "vo": "Put it to work, or inflation eats it. Follow for the next story." }
+  ]
+}

@@ -1,0 +1,114 @@
+[
+ {
+  "id": 1,
+  "start": 0,
+  "frames": 171,
+  "scene": "tea_stall",
+  "speaker": "RAVI",
+  "bubble": [
+   "Ten rupees in 2020.",
+   "Now? \u20b914."
+  ],
+  "visual": {
+   "kind": "price_tag"
+  }
+ },
+ {
+  "id": 2,
+  "start": 171,
+  "frames": 159,
+  "scene": "tea_stall",
+  "speaker": "VIKRAM",
+  "bubble": [
+   "That's inflation.",
+   "Your rupee got weaker."
+  ],
+  "visual": {
+   "kind": "weak_coin"
+  }
+ },
+ {
+  "id": 3,
+  "start": 330,
+  "frames": 183,
+  "scene": "city_park",
+  "speaker": "VIKRAM",
+  "bubble": [
+   "CPI: 4.45%",
+   "Food: even more \u2014 5.52%"
+  ],
+  "visual": {
+   "kind": "stat_cards"
+  }
+ },
+ {
+  "id": 4,
+  "start": 513,
+  "frames": 238,
+  "scene": "city_park",
+  "speaker": "VIKRAM",
+  "bubble": [
+   "72 \u00f7 4.45",
+   "Prices double in ~16 years"
+  ],
+  "visual": {
+   "kind": "rule72"
+  }
+ },
+ {
+  "id": 5,
+  "start": 751,
+  "frames": 170,
+  "scene": "home_desk",
+  "speaker": "RAVI",
+  "bubble": [
+   "My savings pay 3%?",
+   "That's LESS than inflation!"
+  ],
+  "visual": {
+   "kind": "real_rate"
+  }
+ },
+ {
+  "id": 6,
+  "start": 921,
+  "frames": 274,
+  "scene": "trading_floor",
+  "speaker": "VIKRAM",
+  "bubble": [
+   "Nifty wobbles \u2014 but",
+   "over years, equity wins"
+  ],
+  "visual": {
+   "kind": "ticker"
+  }
+ },
+ {
+  "id": 7,
+  "start": 1195,
+  "frames": 149,
+  "scene": "evening_road",
+  "speaker": "RAVI",
+  "bubble": [
+   "Money in the bank",
+   "is slowly melting..."
+  ],
+  "visual": {
+   "kind": "melting"
+  }
+ },
+ {
+  "id": 8,
+  "start": 1344,
+  "frames": 141,
+  "scene": "evening_road",
+  "speaker": "VIKRAM",
+  "bubble": [
+   "Put it to work,",
+   "or inflation eats it."
+  ],
+  "visual": {
+   "kind": "cta"
+  }
+ }
+]

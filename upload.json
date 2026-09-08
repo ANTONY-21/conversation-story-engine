@@ -1,0 +1,21 @@
+{
+  "title": "The ₹10 Chai That Costs ₹14 — Inflation Explained by Two Friends",
+  "description": "Ravi's chai went from ₹10 to ₹14. Vikram explains why — and what inflation is quietly doing to money sitting in a savings account.\n\nNumbers in this video (verified 2026-09-08):\n• India CPI inflation, July 2026: 4.45% (up from 4.38% in June) — Trading Economics\n• Food inflation, July 2026: 5.52% (provisional) — MoSPI Consumer Food Price Index\n• RBI: CPI stayed below the 4% target for 16 straight months before June 2026 — RBI press release\n• Nifty 50: 24,774 six-month high → 23,653 now, −4.5% — Yahoo Finance data\n• Rule of 72: 72 ÷ 4.45 ≈ 16 years for prices to double\n• Chai math: ₹10 × 1.0552^6 = ₹13.82 ≈ ₹14 (+40% in 6 years)\n\nChapters:\n0:00 The ₹10 chai\n0:05 The rupee got weaker\n0:11 Official vs food inflation\n0:17 Prices double every ~16 years\n0:25 Savings account trap\n0:30 Why we invest anyway\n0:39 Cash melts slowly\n0:44 Put it to work\n\nThis video is AI-generated: script, voice, and animation produced with AI tools. Numbers sourced from public data listed above. Not financial advice — for education only.\n\n#inflation #finance #india #investing #personalfinance #financialliteracy #shorts",
+  "tags": ["inflation explained", "india inflation", "rupee value", "rule of 72", "savings account", "nifty 50", "personal finance india", "financial literacy", "investing basics", "chai inflation"],
+  "category": "Education",
+  "playlist": "Money Stories — Explained by Two Friends",
+  "pinned_comment": "Which one are you — Ravi or Vikram? 😄 Tell us the ONE thing whose price shock hurt most (₹10 → ₹14 chai, petrol, tomatoes?) — top comment becomes the next story. Numbers: CPI 4.45% & food 5.52% (July 2026, MoSPI/TradingEconomics).",
+  "thumbnail_text": "₹10 → ₹14",
+  "made_for_kids": false,
+  "ai_disclosure": "Altered or synthetic content: yes — AI-generated voice and animation",
+  "source_line": "CPI 4.45% July 2026 (Trading Economics); food 5.52% (MoSPI); Nifty 24774→23653 (yfinance 2026-09-08); USD/INR 94.82",
+  "duration_s": 49.5,
+  "resolution": ["704x1280", "1280x720"],
+  "files": {
+    "vertical_master": "/opt/kinocut-work/inflation_convo/out/chai_inflation_master.mp4",
+    "horizontal_master": "/opt/kinocut-work/inflation_convo/out/chai_inflation_master_horizontal.mp4",
+    "storyboard": "/opt/kinocut-work/inflation_convo/storyboard.md",
+    "beats": "/opt/kinocut-work/inflation_convo/beats.json",
+    "scene_plan": "/opt/kinocut-work/inflation_convo/scene_plan.json"
+  }
+}
