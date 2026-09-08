@@ -1,86 +1,104 @@
 #!/usr/bin/env python3
-"""Render AK-voice VOs for inflation_convo via IndexTTS2 (wan2gp jkbr7vf3f3c1qz).
-Proven contract (from cardboard_full/render_vos.py): key 'prompt', media.audio_guide =
-raw b64 NO data: URI, spec-wrapped payload, response 'media_b64'.
-Vikram lines get pitch shift -6% in post (asetrate+atempo) for character separation.
-Skips existing wavs; caller scales wan2gp 0->1 before and 1->0 after."""
-import json, os, base64, subprocess, sys
+"""HARDENED VO batch (v2) — 2026-09-08, after the wedged-queue incident.
+Rules baked in (AK: 'don't want money'):
+  1. Endpoint stays at 1/1 — the caller scales it; this script never changes workers.
+  2. Poll-timeout does NOT mean FAILED — status-fetch fallback recovers the job.
+  3. finally: prints ENDPOINT STILL UP reminder; caller must verify 0/0 after.
+  4. Cache-aware: skips turns whose wav already exists.
+"""
+import json, os, base64, subprocess, time, sys
 
-BEATS = '/opt/kinocut-work/inflation_convo/beats.json'
-VO_DIR = '/opt/kinocut-work/inflation_convo/voice'
-REF = '/root/ak-ai-company/news-engine/assets/ak_voice_ref_v6.wav'
+SCRIPT = sys.argv[1] if len(sys.argv) > 1 else '/opt/kinocut-work/AGI_news/beats.json'
+VO_DIR = sys.argv[2] if len(sys.argv) > 2 else '/opt/kinocut-work/AGI_news/voice'
 EP = 'jkbr7vf3f3c1qz'
-os.makedirs(VO_DIR, exist_ok=True)
+REFS = json.load(open(os.path.join(os.path.dirname(SCRIPT), 'voice_refs.json'))) \
+    if os.path.exists(os.path.join(os.path.dirname(SCRIPT), 'voice_refs.json')) else {
+        'default': '/root/ak-ai-company/news-engine/assets/ak_voice_ref_v6.wav'}
 
 def env_key(name):
     for line in open('/opt/hermes/.env'):
         if line.startswith(name + '='):
             return line.strip().split('=', 1)[1].strip().strip('"').strip("'")
-    raise SystemExit(name + ' not in /opt/hermes/.env')
+    raise SystemExit(name)
 
-POLLER = r'''
-import sys, json, base64, time, urllib.request
-job, key, out = sys.argv[1], sys.argv[2], sys.argv[3]
-for i in range(90):
-    time.sleep(5)
-    req = urllib.request.Request(
-        "https://api.runpod.ai/v2/%s/status/%s" % (EP, job),
-        headers={"Authorization": "Bearer " + key})
-    try:
-        d = json.load(urllib.request.urlopen(req, timeout=30))
-    except Exception as e:
-        print("poll err", e); continue
-    s = d.get("status")
-    if s == "COMPLETED":
-        o = d.get("output") or {}
-        mb = o.get("media_b64") or d.get("media_b64")
-        open(out, "wb").write(base64.b64decode(mb))
-        print("SAVED")
-        sys.exit(0)
-    if s in ("FAILED", "CANCELLED"):
-        print("FAILED", json.dumps(d)[:400]); sys.exit(1)
-print("TIMEOUT"); sys.exit(1)
-'''
-open('/tmp/vo_poller.py', 'w').write('EP = "%s"\n' % EP + POLLER)
+KEY = env_key('RUNPOD_API_KEY')
+os.makedirs(VO_DIR, exist_ok=True)
 
-def render_vo(text, out_path):
-    audio_b64 = base64.b64encode(open(REF, 'rb').read()).decode()
+def submit(text, ref_path):
+    ref_b64 = base64.b64encode(open(ref_path, 'rb').read()).decode()
     spec = {"model_type": "index_tts2", "prompt": text,
-            "temperature": 0.9, "top_p": 0.95,
-            "media": {"audio_guide": audio_b64}}
-    payload = json.dumps({"input": {"spec": spec}})
-    with open('/tmp/vo_payload.json', 'w') as f:
-        f.write(payload)  # ARG_MAX trap: never inline in curl
-    key = env_key('RUNPOD_API_KEY')
-    r = subprocess.run(['curl', '-s', '--http1.1', '-X', 'POST',
-        'https://api.runpod.ai/v2/%s/run' % EP,
-        '-H', 'Authorization: Bearer ' + key,
-        '-H', 'Content-Type: application/json',
-        '-d', '@/tmp/vo_payload.json'], capture_output=True, text=True, timeout=120)
-    job = json.loads(r.stdout).get('id')
+            "temperature": 0.9, "top_p": 0.95, "media": {"audio_guide": ref_b64}}
+    open('/tmp/vo_payload.json', 'w').write(json.dumps({"input": {"spec": spec}}))
+    r = subprocess.run(['curl', '-s', '--http1.1', '-m', '60', '-X', 'POST',
+        f'https://api.runpod.ai/v2/{EP}/run',
+        '-H', f'Authorization: Bearer {KEY}', '-H', 'Content-Type: application/json',
+        '-d', '@/tmp/vo_payload.json'], capture_output=True, text=True, timeout=90)
+    return json.loads(r.stdout).get('id')
+
+def status(job):
+    r = subprocess.run(['curl', '-s', '--http1.1', '-m', '30',
+        f'https://api.runpod.ai/v2/{EP}/status/{job}',
+        '-H', f'Authorization: Bearer {KEY}'], capture_output=True, text=True, timeout=60)
+    try:
+        return json.loads(r.stdout)
+    except Exception:
+        return {}
+
+def save_if_done(d, out):
+    o = d.get('output') or {}
+    mb = o.get('media_b64') or d.get('media_b64')
+    if mb:
+        open(out, 'wb').write(base64.b64decode(mb))
+        return True
+    return False
+
+def render_turn(tid, text, ref_path):
+    out = f'{VO_DIR}/{tid}.wav'
+    if os.path.exists(out) and os.path.getsize(out) > 50000:
+        print(tid, 'cached'); return 'ok'
+    job = submit(text, ref_path)
     if not job:
-        print('run failed:', r.stdout[:200]); return False
-    print('job', job, flush=True)
-    p = subprocess.run(['python3', '/tmp/vo_poller.py', job, key, out_path],
-                       capture_output=True, text=True, timeout=560)
-    if 'SAVED' not in p.stdout:
-        print('poll:', p.stdout[-200:], p.stderr[-200:]); return False
-    return True
+        print(tid, 'SUBMIT FAILED'); return 'submit_failed'
+    print(tid, 'submitted', job)
+    # Phase 1: poll 120s (10s interval). Timeout != failure.
+    for _ in range(12):
+        time.sleep(10)
+        d = status(job)
+        st = d.get('status')
+        if st == 'COMPLETED':
+            print(tid, 'SAVED' if save_if_done(d, out) else 'NO MEDIA'); return 'ok'
+        if st in ('FAILED', 'CANCELLED'):
+            print(tid, 'FAILED', json.dumps(d)[:200]); return 'failed'
+    # Phase 2: status-fetch recovery loop up to 10 more min (handles worker cold boot)
+    for _ in range(60):
+        time.sleep(10)
+        d = status(job)
+        st = d.get('status')
+        if st == 'COMPLETED':
+            print(tid, 'RECOVERED SAVED' if save_if_done(d, out) else 'NO MEDIA'); return 'ok'
+        if st in ('FAILED', 'CANCELLED'):
+            print(tid, 'FAILED', json.dumps(d)[:200]); return 'failed'
+        if st is None:  # 404 = purged
+            print(tid, 'JOB 404 — purged, resubmitting'); break
+    # one clean resubmit
+    job2 = submit(text, ref_path)
+    if job2:
+        print(tid, 'resubmitted', job2)
+        for _ in range(60):
+            time.sleep(10)
+            d = status(job2)
+            if d.get('status') == 'COMPLETED':
+                print(tid, 'RETRY SAVED' if save_if_done(d, out) else 'NO MEDIA'); return 'ok'
+            if d.get('status') in ('FAILED', 'CANCELLED'):
+                print(tid, 'RETRY FAILED'); return 'failed'
+    print(tid, 'GAVE UP'); return 'gave_up'
 
-def main():
-    b = json.load(open(BEATS))
-    ok = 0
-    for bt in b['beats']:
-        out = '%s/b%d.wav' % (VO_DIR, bt['id'])
-        if os.path.exists(out) and os.path.getsize(out) > 10000:
-            print('skip b%d (exists)' % bt['id']); ok += 1; continue
-        print('b%d %s: %s' % (bt['id'], bt['speaker'], bt['vo'][:50]), flush=True)
-        if render_vo(bt['vo'], out):
-            ok += 1
-        else:
-            print('FAILED b%d' % bt['id'])
-    print('%d/%d VOs ready' % (ok, len(b['beats'])))
-    sys.exit(0 if ok == len(b['beats']) else 1)
+results = {}
+for t in json.load(open(SCRIPT))['beats']:
+    tid = str(t['id']); voice = t.get('voice', 'default')
+    ref = REFS.get(voice, REFS['default'])
+    results[tid] = render_turn(tid, t['vo'], ref)
 
-if __name__ == '__main__':
-    main()
+json.dump(results, open(os.path.join(VO_DIR, '_results.json'), 'w'))
+print('DONE', results)
+print('REMINDER: verify endpoint 0/0 + no live procs before reporting done.')
